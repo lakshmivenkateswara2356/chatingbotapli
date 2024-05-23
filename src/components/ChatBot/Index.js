@@ -12,7 +12,7 @@ const ChatBot = () => {
     const newMessage = { sender: 'user', text: userInput };
     setMessages([...messages, newMessage]);
 
-    // Send user input to OpenAI API
+    // Send user input to our proxy server
     const botResponse = await getBotResponse(userInput);
     setMessages((prevMessages) => [...prevMessages, newMessage, botResponse]);
 
@@ -21,27 +21,14 @@ const ChatBot = () => {
 
   const getBotResponse = async (input) => {
     try {
-      const response = await axios.post(
-        'https://api.openai.com/v1/engines/davinci-codex/completions',
-        {
-          prompt: input,
-          max_tokens: 150,
-          n: 1,
-          stop: null,
-          temperature: 0.9,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `0E7B0D7C-9C64-4702-8D93-AF93714F6D90`,
-          },
-        }
-      );
+      const response = await axios.post('http://localhost:5000/api/chat', {
+        message: input,
+      });
 
-      const botMessage = response.data.choices[0].text.trim();
+      const botMessage = response.data.botMessage;
       return { sender: 'bot', text: botMessage };
     } catch (error) {
-      console.error('Error fetching response from OpenAI:', error);
+      console.error('Error fetching response from server:', error);
       return { sender: 'bot', text: "Sorry, I couldn't process your request." };
     }
   };
@@ -64,7 +51,7 @@ const ChatBot = () => {
             if (e.key === 'Enter') handleSend();
           }}
         />
-        <button onClick={handleSend}>Send button</button>
+        <button onClick={handleSend}>Send</button>
       </div>
     </div>
   );

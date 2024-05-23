@@ -12,7 +12,7 @@ const ChatBot = () => {
     const newMessage = { sender: 'user', text: userInput };
     setMessages([...messages, newMessage]);
 
-    // Send user input to our proxy server
+    // Send user input to OpenAI API
     const botResponse = await getBotResponse(userInput);
     setMessages((prevMessages) => [...prevMessages, newMessage, botResponse]);
 
@@ -21,14 +21,27 @@ const ChatBot = () => {
 
   const getBotResponse = async (input) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/chat', {
-        message: input,
-      });
+      const response = await axios.post(
+        'https://api.openai.com/v1/engines/davinci-codex/completions',
+        {
+          prompt: input,
+          max_tokens: 150,
+          n: 1,
+          stop: null,
+          temperature: 0.9,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer YOUR_OPENAI_API_KEY`,
+          },
+        }
+      );
 
-      const botMessage = response.data.botMessage;
+      const botMessage = response.data.choices[0].text.trim();
       return { sender: 'bot', text: botMessage };
     } catch (error) {
-      console.error('Error fetching response from server:', error);
+      console.error('Error fetching response from OpenAI:', error);
       return { sender: 'bot', text: "Sorry, I couldn't process your request." };
     }
   };

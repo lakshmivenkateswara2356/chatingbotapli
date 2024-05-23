@@ -64,7 +64,7 @@ const ChatBot = () => {
             if (e.key === 'Enter') handleSend();
           }}
         />
-        <button onClick={handleSend}>Send</button>
+        <button onClick={handleSend}>Send button</button>
       </div>
     </div>
   );
